@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app  # Монтируем код, чтобы изменения применялись без пересборки контейнера
+    environment:
+      - PYTHONUNBUFFERED=1 # Чтобы логи Python сразу выводились в консоль Docker
+      - MONGO_URL=mongodb://mongodb:27017/
+    depends_on:
+      - mongodb # Бекенд запустится после БД
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules  # Изолируем node_modules контейнера от хост-машины
+    depends_on:
+      - backend
+volumes:
+  mongo_data:
