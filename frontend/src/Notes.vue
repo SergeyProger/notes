@@ -12,13 +12,25 @@ BContainer.py-4.body
         show
       ) {{ statusMessage }}
 
+      //- Поле поиска
+      BFormGroup.mb-4(label="Поиск по заметкам")
+        BFormInput(
+          v-model="searchQuery"
+          @input="handleSearch"
+          placeholder="Введите текст для поиска..."
+          type="search"
+        )
+
       BForm(@submit.prevent="createNote")
         BFormGroup.mb-3(label="Новая заметка" label-for="new-note-text")
-          BFormTextarea#new-note-text(
-            v-model="newNoteText"
-            rows="4"
+          QuillEditor(
+            theme="snow"
+            v-model:content="newNoteText"
+            contentType="html"
+            :toolbar="toolbarOptions"
             placeholder="Напишите новую заметку..."
           )
+
         .d-flex.justify-content-end
           BButton(variant="primary" type="submit" :disabled="loading") ➕ Добавить
 
@@ -36,7 +48,9 @@ BContainer.py-4.body
             BCardTitle
               .small.text-muted.mb-2 📅 {{ formatDate(note.created_at) }}
               .small.text-muted(v-if="note.updated_at !== note.created_at") ✏️ {{ formatDate(note.updated_at) }}
-            BCardText {{ note.text }}
+            BCardText
+              .ql-snow
+                .ql-editor(v-html="note.text" contenteditable="true" style="padding: 0;")
 
             template.d-flex.gap-2(#footer)
               BButton(variant="outline-primary" size="sm" @click="editNote(note)") Изменить
@@ -44,7 +58,12 @@ BContainer.py-4.body
 
   BModal(v-model="isEditModalOpen" title="Редактирование заметки" centered)
     BFormGroup(label="Текст заметки")
-      BFormTextarea(v-model="editingNoteText" rows="6")
+      QuillEditor(
+        theme="snow"
+        v-model:content="editingNoteText"
+        contentType="html"
+        :toolbar="toolbarOptions"
+      )
     template(#footer)
       BButton(variant="outline-secondary" @click="closeEditModal") Отмена
       BButton(variant="success" @click="saveEditedNote") 💾 Сохранить
@@ -52,16 +71,17 @@ BContainer.py-4.body
 
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { QuillEditor } from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css'
+
 import {
   BAlert,
   BBadge,
   BButton,
   BCard,
-  BCardGroup,
   BCardBody,
   BCardTitle,
   BCardText,
-  BCardFooter,
   BCol,
   BContainer,
   BForm,
@@ -69,7 +89,8 @@ import {
   BFormTextarea,
   BModal,
   BRow,
-  BSpinner
+  BSpinner,
+  BFormInput
 } from 'bootstrap-vue-next'
 
 const API_BASE = 'http://localhost:8000'
@@ -82,6 +103,15 @@ const loading = ref(false)
 const statusMessage = ref('')
 const statusType = ref('success')
 let refreshTimer = null
+const searchQuery = ref('')
+
+
+// Настраиваем только те кнопки, которые вам нужны (Bold + списки)
+const toolbarOptions = [
+  ['bold', 'italic', 'underline'], // Форматирование текста
+  [{ 'list': 'ordered'}, { 'list': 'bullet' }], // Списки
+  ['clean'] // Кнопка очистки форматирования
+]
 
 onMounted(() => {
   loadNotes()
@@ -97,8 +127,15 @@ onBeforeUnmount(() => {
 async function loadNotes() {
   loading.value = true
 
+  let url = `${API_BASE}/notes`
+
+  if (searchQuery.value) {
+    const params = new URLSearchParams({ search: searchQuery.value })
+    url += `?${params.toString()}` // Получится /notes?search=ваштекст
+  }
+
   try {
-    const response = await fetch(`${API_BASE}/notes`)
+    const response = await fetch(url)
     if (!response.ok) {
       throw new Error('Failed to load notes')
     }
@@ -124,7 +161,7 @@ async function createNote() {
   }
 
   try {
-    const response = await fetch(`${API_BASE}/write`, {
+    const response = await fetch(`${API_BASE}/notes`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -229,4 +266,14 @@ function formatDate(date) {
     minute: '2-digit'
   }).format(date)
 }
+
+let searchTimeout = null
+const handleSearch = () => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+
+  searchTimeout = setTimeout(() => {
+    loadNotes()
+  }, 500) // Задержка в 500 мс после последнего ввода
+}
+
 </script>
