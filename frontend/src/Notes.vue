@@ -93,7 +93,7 @@ import {
   BFormInput
 } from 'bootstrap-vue-next'
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://18.208.167.55:8000'
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://3.95.134.89:8000'
 const notes = ref([])
 const newNoteText = ref('')
 const editingNote = ref(null)
