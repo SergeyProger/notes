@@ -3,8 +3,8 @@ BContainer.py-4.body
   BCard.shadow-sm.border-0
     BCardBody.p-4
       .d-flex.flex-column.flex-md-row.align-items-md-center.justify-content-between.gap-3.mb-4
-        h1.h3.mb-0 📝 Мои заметки
-        BBadge.bg-primary.rounded-pill.fs-6(v-if="!loading") {{ notes.length }} заметок
+        h1.h3.mb-0 📝 My notes
+        BBadge.bg-primary.rounded-pill.fs-6(v-if="!loading") {{ notes.length }} notes
 
       BAlert(
         v-model="statusVisible"
@@ -12,52 +12,55 @@ BContainer.py-4.body
         dismissible
       ) {{ statusMessage }}
 
-      //- Поле поиска
-      BFormGroup.mb-4(label="Поиск по заметкам")
+      //- Search field
+      BFormGroup.mb-4(label="Search notes")
         BFormInput(
           v-model="searchQuery"
           @input="handleSearch"
-          placeholder="Введите текст для поиска..."
+          placeholder="Enter text to search..."
           type="search"
         )
 
       BForm(@submit.prevent="createNote")
-        BFormGroup.mb-3(label="Новая заметка" label-for="new-note-text")
+        BFormGroup.mb-3(label="New note" label-for="new-note-text")
+          BFormInput.mb-3(id="new-note-title" v-model="newNoteTitle" placeholder="Enter the note title..." required)
           QuillEditor(
             theme="snow"
             v-model:content="newNoteText"
             contentType="html"
             :toolbar="toolbarOptions"
-            placeholder="Напишите новую заметку..."
+            placeholder="Write a new note..."
           )
 
         .d-flex.justify-content-end
-          BButton(variant="primary" type="submit" :disabled="loading") ➕ Добавить
+          BButton(variant="primary" type="submit" :disabled="loading") ➕ Add
 
       .text-center.py-5(v-if="loading")
-        BSpinner(variant="primary" label="Загрузка заметок")
-        .mt-2 Загрузка заметок...
+        BSpinner(variant="primary" label="Loading notes")
+        .mt-2 Loading notes...
 
       .text-center.py-5(v-else-if="notes.length === 0")
         .display-6 🎉
-        p.mb-0 У вас еще нет заметок
+        p.mb-0 You don't have any notes yet
 
       BRow.g-3.mt-4.p-4(v-else)
         BCol(cols="12" md="6" lg="4" v-for="note in notes" :key="note.id")
-          BCard(border-variant="primary" align="center" card-height="100%" class="h-100")
-            BCardTitle
+          BCard(border-variant="primary" align="center" card-height="100%" class="h-100" :title="note.title")
+            BCardSubtitle
               .small.text-muted.mb-2 📅 {{ formatDate(note.created_at) }}
               .small.text-muted(v-if="note.updated_at !== note.created_at") ✏️ {{ formatDate(note.updated_at) }}
             BCardText
               .ql-snow
                 .ql-editor(v-html="note.text" contenteditable="true" style="padding: 0;")
 
-            template.d-flex.gap-2(#footer)
-              BButton(variant="outline-primary" size="sm" @click="editNote(note)") Изменить
-              BButton(variant="outline-danger" size="sm" @click="deleteNote(note.id)") Удалить
+            template(#footer)
+              .d-flex.gap-2.justify-content-center
+                BButton(variant="outline-primary" size="sm" @click="editNote(note)") ✏️ Edit
+                BButton(variant="outline-danger" size="sm" @click="deleteNote(note.id)") 🗑️ Delete
 
-  BModal(v-model="isEditModalOpen" title="Редактирование заметки" centered)
-    BFormGroup(label="Текст заметки")
+  BModal(v-model="isEditModalOpen" title="Edit note" centered)
+    BFormGroup(label="Note text")
+      BFormInput.mb-3(id="new-note-title" v-model="editingNoteTitle" placeholder="Enter the note title..." required)
       QuillEditor(
         theme="snow"
         v-model:content="editingNoteText"
@@ -65,8 +68,8 @@ BContainer.py-4.body
         :toolbar="toolbarOptions"
       )
     template(#footer)
-      BButton(variant="outline-secondary" @click="closeEditModal") Отмена
-      BButton(variant="success" @click="saveEditedNote") 💾 Сохранить
+      BButton(variant="outline-secondary" @click="closeEditModal") Cancel ❌
+      BButton(variant="success" @click="saveEditedNote") 💾 Save
 </template>
 
 <script setup>
@@ -81,6 +84,7 @@ import {
   BCard,
   BCardBody,
   BCardTitle,
+  BCardSubtitle,
   BCardText,
   BCol,
   BContainer,
@@ -95,7 +99,9 @@ import {
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://54.84.204.161:8000'
 const notes = ref([])
 const newNoteText = ref('')
+const newNoteTitle = ref('')
 const editingNote = ref(null)
+const editingNoteTitle = ref('')
 const editingNoteText = ref('')
 const isEditModalOpen = ref(false)
 const loading = ref(false)
@@ -106,11 +112,11 @@ const searchQuery = ref('')
 let statusVisible = computed(() => statusMessage.value !== '')
 
 
-// Настраиваем только те кнопки, которые вам нужны (Bold + списки)
+// Configure only the buttons you need (Bold + lists)
 const toolbarOptions = [
-  ['bold', 'italic', 'underline'], // Форматирование текста
-  [{ 'list': 'ordered'}, { 'list': 'bullet' }], // Списки
-  ['clean'] // Кнопка очистки форматирования
+  ['bold', 'italic', 'underline'], // Text formatting
+  [{ 'list': 'ordered'}, { 'list': 'bullet' }], // Lists
+  ['clean'] // Clear formatting button
 ]
 
 onMounted(() => {
@@ -131,7 +137,7 @@ async function loadNotes() {
 
   if (searchQuery.value) {
     const params = new URLSearchParams({ search: searchQuery.value })
-    url += `?${params.toString()}` // Получится /notes?search=ваштекст
+    url += `?${params.toString()}` // Results in /notes?search=yourtext
   }
 
   try {
@@ -148,15 +154,15 @@ async function loadNotes() {
     }))
   } catch (error) {
     console.error('Error loading notes:', error)
-    showStatus('Ошибка при загрузке заметок', 'error')
+    showStatus('Failed to load notes', 'error')
   } finally {
     loading.value = false
   }
 }
 
 async function createNote() {
-  if (!newNoteText.value.trim()) {
-    showStatus('Заметка не может быть пустой', 'error')
+  if (!newNoteTitle.value.trim()) {
+    showStatus('The note title cannot be empty', 'error')
     return
   }
 
@@ -166,7 +172,7 @@ async function createNote() {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ text: newNoteText.value })
+      body: JSON.stringify({ text: newNoteText.value, title: newNoteTitle.value })
     })
 
     if (!response.ok) {
@@ -174,17 +180,19 @@ async function createNote() {
     }
 
     newNoteText.value = '<p><br></p>'
-    showStatus('✅ Заметка успешно создана!', 'success')
+    newNoteTitle.value = ''
+    showStatus('✅ Note created successfully!', 'success')
     await loadNotes()
   } catch (error) {
     console.error('Error creating note:', error)
-    showStatus('Ошибка при создании заметки', 'error')
+    showStatus('Failed to create note', 'error')
   }
 }
 
 function editNote(note) {
   editingNote.value = { ...note }
   editingNoteText.value = note.text
+  editingNoteTitle.value = note.title
   isEditModalOpen.value = true
 }
 
@@ -192,11 +200,12 @@ function closeEditModal() {
   isEditModalOpen.value = false
   editingNote.value = null
   editingNoteText.value = ''
+  editingNoteTitle.value = ''
 }
 
 async function saveEditedNote() {
-  if (!editingNote.value || !editingNoteText.value.trim()) {
-    showStatus('Заметка не может быть пустой', 'error')
+  if (!editingNote.value || !editingNoteText.value.trim() || !editingNoteTitle.value.trim()) {
+    showStatus('The note title and text cannot be empty', 'error')
     return
   }
 
@@ -206,7 +215,7 @@ async function saveEditedNote() {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ text: editingNoteText.value })
+      body: JSON.stringify({ text: editingNoteText.value, title: editingNoteTitle.value })
     })
 
     if (!response.ok) {
@@ -214,16 +223,16 @@ async function saveEditedNote() {
     }
 
     closeEditModal()
-    showStatus('✅ Заметка успешно обновлена!', 'success')
+    showStatus('✅ Note updated successfully!', 'success')
     await loadNotes()
   } catch (error) {
     console.error('Error updating note:', error)
-    showStatus('Ошибка при обновлении заметки', 'error')
+    showStatus('Failed to update note', 'error')
   }
 }
 
 async function deleteNote(noteId) {
-  if (!confirm('Вы уверены? Эту заметку нельзя будет восстановить.')) {
+  if (!confirm('Are you sure? This note cannot be restored.')) {
     return
   }
 
@@ -236,11 +245,11 @@ async function deleteNote(noteId) {
       throw new Error('Failed to delete note')
     }
 
-    showStatus('✅ Заметка успешно удалена!', 'success')
+    showStatus('✅ Note deleted successfully!', 'success')
     await loadNotes()
   } catch (error) {
     console.error('Error deleting note:', error)
-    showStatus('Ошибка при удалении заметки', 'error')
+    showStatus('Failed to delete note', 'error')
   }
 }
 
@@ -258,7 +267,7 @@ function formatDate(date) {
     return ''
   }
 
-  return new Intl.DateTimeFormat('ru-RU', {
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -273,7 +282,7 @@ const handleSearch = () => {
 
   searchTimeout = setTimeout(() => {
     loadNotes()
-  }, 500) // Задержка в 500 мс после последнего ввода
+  }, 500) // 500 ms delay after the last input
 }
 
 </script>

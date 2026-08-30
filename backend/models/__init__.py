@@ -1,10 +1,10 @@
 # backend/models/__init__.py
 from .note import Note
-# По мере роста проекта добавляете сюда новые модели:
+# As the project grows, add new models here:
 # from .user import User
 # from .referral import Referral
 
-# Собираем все документы в один список
+# Collect all documents into a single list
 document_models = [
     Note,
     # User,

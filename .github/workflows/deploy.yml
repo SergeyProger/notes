@@ -1,10 +1,10 @@
 name: Deploy to AWS EC2
 
-# Триггер: запускать только при пуше в ветку master
+# Trigger: run only on a push to the master branch
 on:
   push:
     branches:
-      - master # Если ваша основная ветка называется main, поменяйте на main
+      - master # If your main branch is called main, change this to main
 
 jobs:
   deploy:
@@ -18,7 +18,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          # Команды, которые GitHub выполнит на вашем сервере
+          # Commands GitHub will run on your server
           script: |
             cd ~/notes
             git pull origin master

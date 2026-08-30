@@ -12,13 +12,13 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend:/app  # Монтируем код, чтобы изменения применялись без пересборки контейнера
+    # volumes:
+    #   - ./backend:/app  # Mount the code so changes apply without rebuilding the container
     environment:
-      - PYTHONUNBUFFERED=1 # Чтобы логи Python сразу выводились в консоль Docker
+      - PYTHONUNBUFFERED=1 # So Python logs are printed to the Docker console immediately
       - MONGO_URL=mongodb://mongodb:27017/
     depends_on:
-      - mongodb # Бекенд запустится после БД
+      - mongodb # The backend starts after the DB
 
   frontend:
     build: ./frontend
@@ -26,7 +26,7 @@ services:
       - "5173:5173"
     volumes:
       - ./frontend:/app
-      - /app/node_modules  # Изолируем node_modules контейнера от хост-машины
+      - /app/node_modules  # Isolate the container's node_modules from the host machine
     depends_on:
       - backend
 volumes:

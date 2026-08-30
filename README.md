@@ -1,35 +1,34 @@
 # 📝 Notes Management Application
 
-Простое приложение для управления заметками, построенное на FastAPI (backend) и Vue.js (frontend) с MongoDB.
+A simple note management application built with FastAPI (backend) and Vue.js (frontend) with MongoDB.
 
-## 📂 Структура проекта
+## 📂 Project structure
 
 ```
 test_docker/
 ├── backend/
-│   └── main.py                 # FastAPI приложение
+│   └── main.py                 # FastAPI application
 ├── frontend/
-│   ├── index.html              # Главная страница
+│   ├── index.html              # Main page
 │   ├── styles/
-│   │   ├── main.css            # Скомпилированные стили
-│   │   └── main.scss           # SCSS исходники
-│   ├── package.json            # NPM зависимости
-│   └── docker-compose.yml      # Docker конфигурация
-├── docker-compose.yml          # Общая конфигурация контейнеров
-└── README.md                   # Этот файл
+│   │   └── main.scss           # SCSS sources
+│   ├── package.json            # NPM dependencies
+│   └── docker-compose.yml      # Docker configuration
+├── docker-compose.yml          # Overall container configuration
+└── README.md                   # This file
 ```
 
-## 🚀 Запуск приложения
+## 🚀 Running the application
 
-### С использованием Docker Compose (рекомендуется)
+### Using Docker Compose (recommended)
 
 ```bash
 docker-compose up
 ```
 
-Приложение будет доступно по адресу: `http://localhost:3000`
+The application will be available at: `http://localhost:3000`
 
-### Локальный запуск
+### Running locally
 
 #### Backend (FastAPI)
 ```bash
@@ -38,25 +37,25 @@ pip install -r requirements.txt
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Backend будет доступен на: `http://localhost:8000`
+The backend will be available at: `http://localhost:8000`
 
 #### Frontend (Vue.js)
 ```bash
 cd frontend
-# Просто откройте index.html в браузере
-# или используйте простой HTTP сервер:
+# Simply open index.html in a browser
+# or use a simple HTTP server:
 python -m http.server 3000
 ```
 
-Frontend будет доступен на: `http://localhost:3000`
+The frontend will be available at: `http://localhost:3000`
 
-## 📚 API Маршруты
+## 📚 API routes
 
 ### GET `/`
-Возвращает все заметки (перенаправляет на `/notes`)
+Returns all notes (redirects to `/notes`)
 
 ### GET `/notes`
-Получить все заметки, отсортированные по дате создания (новые первыми)
+Get all notes sorted by creation date (newest first)
 
 **Response:**
 ```json
@@ -64,7 +63,8 @@ Frontend будет доступен на: `http://localhost:3000`
   "notes": [
     {
       "id": "507f1f77bcf86cd799439011",
-      "text": "Содержание заметки",
+      "text": "Note content",
+      "title": "Note title",
       "created_at": "2026-08-16T18:40:00",
       "updated_at": "2026-08-16T18:45:00"
     }
@@ -74,41 +74,41 @@ Frontend будет доступен на: `http://localhost:3000`
 ```
 
 ### GET `/notes/{note_id}`
-Получить одну заметку по ID
+Get a single note by ID
 
 ### POST `/write`
-Создать новую заметку
+Create a new note
 
 **Request:**
 ```json
 {
-  "text": "Содержание новой заметки"
+  "text": "New note content"
 }
 ```
 
 ### PUT `/notes/{note_id}`
-Обновить заметку
+Update a note
 
 **Request:**
 ```json
 {
-  "text": "Обновленное содержание"
+  "text": "Updated content"
 }
 ```
 
 ### DELETE `/notes/{note_id}`
-Удалить заметку
+Delete a note
 
-## 🎨 Стили
+## 🎨 Styles
 
-Стили организованы в следующей структуре:
+The styles are organized in the following structure:
 
-- **main.scss** — SCSS исходники (организованы с переменными и миксинами)
-- **main.css** — Скомпилированный CSS файл
+- **main.scss** — SCSS sources (organized with variables and mixins)
+- **main.css** — Compiled CSS file
 
-### Компиляция SCSS в CSS
+### Compiling SCSS into CSS
 
-Если вы внесли изменения в `main.scss`, вам нужно пересчитать CSS:
+If you made changes to `main.scss`, you need to recompile the CSS:
 
 ```bash
 cd frontend
@@ -116,73 +116,73 @@ npm install -D sass
 npx sass styles/main.scss styles/main.css
 ```
 
-## 🛠️ Технологический стек
+## 🛠️ Technology stack
 
 ### Backend
-- **FastAPI** — веб-фреймворк
-- **Motor** — асинхронный драйвер MongoDB
-- **Pydantic** — валидация данных
-- **CORS** — поддержка кросс-оригинных запросов
+- **FastAPI** — web framework
+- **Motor** — asynchronous MongoDB driver
+- **Pydantic** — data validation
+- **CORS** — cross-origin request support
 
 ### Frontend
-- **Vue.js 3** — фреймворк UI
-- **CSS/SCSS** — стили
-- **Fetch API** — HTTP запросы
+- **Vue.js 3** — UI framework
+- **CSS/SCSS** — styles
+- **Fetch API** — HTTP requests
 
 ### Database
-- **MongoDB** — NoSQL база данных
+- **MongoDB** — NoSQL database
 
-## ✨ Функциональность
+## ✨ Features
 
-✅ Просмотр всех заметок в виде карточек  
-✅ Создание новых заметок  
-✅ Редактирование существующих заметок  
-✅ Удаление заметок  
-✅ Отслеживание дат создания и редактирования  
-✅ Статистика (количество заметок)  
-✅ Адаптивный дизайн для мобильных устройств  
-✅ Уведомления об ошибках и успехе  
-✅ Авто-обновление заметок каждые 30 секунд
+✅ View all notes as cards  
+✅ Create new notes  
+✅ Edit existing notes  
+✅ Delete notes  
+✅ Track creation and edit dates  
+✅ Statistics (note count)  
+✅ Responsive design for mobile devices  
+✅ Error and success notifications  
+✅ Auto-refresh of notes every 30 seconds
 
-## 📱 Адаптивность
+## 📱 Responsiveness
 
-Приложение полностью адаптивно и работает на:
+The application is fully responsive and works on:
 - Desktop (1200px+)
 - Tablet (768px - 1199px)
-- Mobile (до 767px)
+- Mobile (up to 767px)
 
-## 🔧 Требования
+## 🔧 Requirements
 
-- Node.js 18+ (для фронтенда)
-- Python 3.9+ (для бэкенда)
-- MongoDB 5.0+ (база данных)
-- Docker & Docker Compose (для запуска в контейнерах)
+- Node.js 18+ (for the frontend)
+- Python 3.9+ (for the backend)
+- MongoDB 5.0+ (database)
+- Docker & Docker Compose (to run in containers)
 
-## 📝 Примеры использования
+## 📝 Usage examples
 
-### Создание заметки через API
+### Creating a note via the API
 
 ```bash
 curl -X POST http://localhost:8000/write \
   -H "Content-Type: application/json" \
-  -d '{"text": "Моя первая заметка"}'
+  -d '{"text": "My first note"}'
 ```
 
-### Получение всех заметок
+### Getting all notes
 
 ```bash
 curl http://localhost:8000/notes
 ```
 
-### Обновление заметки
+### Updating a note
 
 ```bash
 curl -X PUT http://localhost:8000/notes/{note_id} \
   -H "Content-Type: application/json" \
-  -d '{"text": "Обновленное содержание"}'
+  -d '{"text": "Updated content"}'
 ```
 
-### Удаление заметки
+### Deleting a note
 
 ```bash
 curl -X DELETE http://localhost:8000/notes/{note_id}
@@ -190,21 +190,21 @@ curl -X DELETE http://localhost:8000/notes/{note_id}
 
 ## 🐛 Troubleshooting
 
-### Не удается подключиться к MongoDB
-- Убедитесь, что MongoDB запущен
-- Проверьте MONGO_URL в переменных окружения
-- По умолчанию: `mongodb://localhost:27017`
+### Cannot connect to MongoDB
+- Make sure MongoDB is running
+- Check MONGO_URL in the environment variables
+- Default: `mongodb://localhost:27017`
 
-### Frontend не видит Backend
-- Проверьте что Backend запущен на `http://localhost:8000`
-- Убедитесь что CORS правильно настроен
-- Проверьте консоль браузера на ошибки
+### The frontend does not see the backend
+- Check that the backend is running at `http://localhost:8000`
+- Make sure CORS is configured correctly
+- Check the browser console for errors
 
-### Стили не применяются
-- Очистите кэш браузера (Ctrl+Shift+Delete)
-- Убедитесь что файл `styles/main.css` загружается
-- Проверьте консоль браузера на ошибки 404
+### Styles are not applied
+- Clear the browser cache (Ctrl+Shift+Delete)
+- Make sure the `styles/main.css` file is being loaded
+- Check the browser console for 404 errors
 
-## 📄 Лицензия
+## 📄 License
 
 MIT License

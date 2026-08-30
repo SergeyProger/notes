@@ -2,15 +2,15 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Сначала копируем только файлы зависимостей для кеширования слоя
+# First copy only the dependency files so the layer can be cached
 COPY package*.json ./
 
 RUN npm install
 
-# Копируем остальной код
+# Copy the rest of the code
 COPY . .
 
 EXPOSE 5173
 
-# Запускаем Vite с флагом --host, чтобы сервер был доступен снаружи контейнера
+# Run Vite with the --host flag so the server is reachable from outside the container
 CMD ["npm", "run", "dev", "--", "--host"]

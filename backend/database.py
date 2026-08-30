@@ -8,7 +8,7 @@ MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
 async def init_db():
     client = AsyncIOMotorClient(MONGO_URL)
 
-    # Передаем список моделей в Beanie
+    # Pass the list of models to Beanie
     await init_beanie(
         database=client.app_database,
         document_models=document_models
