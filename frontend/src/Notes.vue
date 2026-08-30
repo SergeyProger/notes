@@ -7,9 +7,9 @@ BContainer.py-4.body
         BBadge.bg-primary.rounded-pill.fs-6(v-if="!loading") {{ notes.length }} заметок
 
       BAlert(
-        v-if="statusMessage"
+        v-model="statusVisible"
         :variant="statusType === 'success' ? 'success' : 'danger'"
-        show
+        dismissible
       ) {{ statusMessage }}
 
       //- Поле поиска
@@ -70,7 +70,7 @@ BContainer.py-4.body
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, computed } from 'vue'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 
@@ -86,7 +86,6 @@ import {
   BContainer,
   BForm,
   BFormGroup,
-  BFormTextarea,
   BModal,
   BRow,
   BSpinner,
@@ -104,6 +103,7 @@ const statusMessage = ref('')
 const statusType = ref('success')
 let refreshTimer = null
 const searchQuery = ref('')
+let statusVisible = computed(() => statusMessage.value !== '')
 
 
 // Настраиваем только те кнопки, которые вам нужны (Bold + списки)
@@ -115,7 +115,7 @@ const toolbarOptions = [
 
 onMounted(() => {
   loadNotes()
-  refreshTimer = setInterval(() => loadNotes(), 30000000) // 5 минут
+  refreshTimer = setInterval(() => loadNotes(), 400000)
 })
 
 onBeforeUnmount(() => {
@@ -173,7 +173,7 @@ async function createNote() {
       throw new Error('Failed to create note')
     }
 
-    newNoteText.value = ''
+    newNoteText.value = '<p><br></p>'
     showStatus('✅ Заметка успешно создана!', 'success')
     await loadNotes()
   } catch (error) {
